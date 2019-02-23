@@ -1,4 +1,4 @@
-export declare class ButtonClickModel {
+export interface ButtonClickModel {
     buttonType: string;
     data: any;
 }

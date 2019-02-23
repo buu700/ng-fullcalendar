@@ -1,56 +1,6 @@
 import { Component, ElementRef, EventEmitter, Input, NgModule, NgZone, Output } from '@angular/core';
 import $ from 'jquery';
-import fullcalendar from 'fullcalendar';
-$.fn.fullCalendar = function(options) {
-	var args = Array.prototype.slice.call(arguments, 1); // for a possible method call
-	var res = this; // what this function will return (this jQuery object by default)
-
-	this.each(function(i, _element) { // loop each DOM element involved
-		var element = $(_element);
-		var calendar = element.data('fullCalendar'); // get the existing calendar object (if any)
-		var singleRes; // the returned value of this single method call
-
-		// a method call
-		if (typeof options === 'string') {
-
-			if (options === 'getCalendar') {
-				if (!i) { // first element only
-					res = calendar;
-				}
-			}
-			else if (options === 'destroy') { // don't warn if no calendar object
-				if (calendar) {
-					calendar.destroy();
-					element.removeData('fullCalendar');
-				}
-			}
-			else if (!calendar) {
-				FC.warn("Attempting to call a FullCalendar method on an element with no calendar.");
-			}
-			else if ($.isFunction(calendar[options])) {
-				singleRes = calendar[options].apply(calendar, args);
-
-				if (!i) {
-					res = singleRes; // record the first method call result
-				}
-				if (options === 'destroy') { // for the destroy method, must remove Calendar object data
-					element.removeData('fullCalendar');
-				}
-			}
-			else {
-				FC.warn("'" + options + "' is an unknown FullCalendar method.");
-			}
-		}
-		// a new calendar initialization
-		else if (!calendar) { // don't initialize twice
-			calendar = new fullcalendar.Calendar(element, options);
-			element.data('fullCalendar', calendar);
-			calendar.render();
-		}
-	});
-
-	return res;
-};
+import 'fullcalendar';
 
 /**
  * @fileoverview added by tsickle
@@ -81,9 +31,12 @@ var CalendarComponent = /** @class */ (function () {
     function CalendarComponent(element, zone) {
         this.element = element;
         this.zone = zone;
+        this._eventsModel = [];
         this._reRender = true;
         // Notify when things change
         this.eventsModelChange = new EventEmitter();
+        // Options object, see fullcalendar docs
+        this.options = {};
         // Various events
         this.eventDrop = new EventEmitter();
         this.eventResize = new EventEmitter();
@@ -158,13 +111,13 @@ var CalendarComponent = /** @class */ (function () {
         setTimeout(function () {
             _this.updaterOptions();
             _this.zone.runOutsideAngular(function () {
-                $(_this.element.nativeElement).fullCalendar(_this.options);
+                var /** @type {?} */ $elem = $(_this.element.nativeElement);
+                $elem.fullCalendar(_this.options);
                 _this._eventsModel = _this.options.events;
                 _this.eventsModelChange.next(_this.options.events);
                 _this.initialized.emit(true);
-                // Click listeners
-                var /** @type {?} */ elem = document.getElementsByTagName('ng-fullcalendar');
-                $('[class ^="fc"][class *="button"]').click(function (el) {
+                var /** @type {?} */ elem = [_this.element.nativeElement];
+                $elem.find('[class ^="fc"][class *="button"]').click(function (el) {
                     var /** @type {?} */ classnames = el.currentTarget.className.split(' ');
                     classnames.forEach(function (name) {
                         if (name.indexOf('button') == name.length - 6) {
@@ -181,7 +134,7 @@ var CalendarComponent = /** @class */ (function () {
                  * @return {?}
                  */
                 function eventDispatch(buttonType) {
-                    var /** @type {?} */ data = $('ng-fullcalendar').fullCalendar('getDate');
+                    var /** @type {?} */ data = $elem.fullCalendar('getDate');
                     var /** @type {?} */ currentDetail = {
                         buttonType: buttonType,
                         data: data
@@ -233,7 +186,7 @@ var CalendarComponent = /** @class */ (function () {
      */
     function () {
         var _this = this;
-        var /** @type {?} */ elem = document.getElementsByTagName('ng-fullcalendar');
+        var /** @type {?} */ elem = [this.element.nativeElement];
         this.options.eventDrop = function (event, duration, revertFunc) {
             var /** @type {?} */ detail = { event: event, duration: duration, revertFunc: revertFunc };
             var /** @type {?} */ widgetEvent = new CustomEvent('eventDrop', {
@@ -451,7 +404,7 @@ var CalendarComponent = /** @class */ (function () {
             });
             elem[0].dispatchEvent(widgetEvent);
         };
-        this.options.resourceRender = function (resourceObj, labelTds, bodyTds) {
+        (/** @type {?} */ (this.options)).resourceRender = function (resourceObj, labelTds, bodyTds) {
             var /** @type {?} */ detail = { resourceObj: resourceObj, labelTds: labelTds, bodyTds: bodyTds };
             var /** @type {?} */ widgetEvent = new CustomEvent('resourceRender', {
                 bubbles: true,
@@ -590,26 +543,6 @@ var FullCalendarModule = /** @class */ (function () {
  * @fileoverview added by tsickle
  * @suppress {checkTypes} checked by tsc
  */
-var ButtonClickModel = /** @class */ (function () {
-    function ButtonClickModel() {
-    }
-    return ButtonClickModel;
-}());
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes} checked by tsc
- */
-var UpdateEventModel = /** @class */ (function () {
-    function UpdateEventModel() {
-    }
-    return UpdateEventModel;
-}());
-
-/**
- * @fileoverview added by tsickle
- * @suppress {checkTypes} checked by tsc
- */
 
 /**
  * @fileoverview added by tsickle
@@ -619,5 +552,5 @@ var UpdateEventModel = /** @class */ (function () {
  * Generated bundle index. Do not edit.
  */
 
-export { FullCalendarModule, CalendarComponent, ButtonClickModel, UpdateEventModel };
+export { FullCalendarModule, CalendarComponent };
 //# sourceMappingURL=ng-fullcalendar.es5.js.map

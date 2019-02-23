@@ -1,5 +1,6 @@
 import { OnInit, NgZone, AfterViewInit, AfterContentChecked, AfterViewChecked, ElementRef, EventEmitter } from '@angular/core';
 import 'fullcalendar';
+import { Options } from 'fullcalendar';
 import './lib/customEvent';
 export declare class CalendarComponent implements OnInit, AfterViewInit, AfterContentChecked, AfterViewChecked {
     private element;
@@ -8,7 +9,7 @@ export declare class CalendarComponent implements OnInit, AfterViewInit, AfterCo
     private _reRender;
     eventsModel: any[];
     eventsModelChange: EventEmitter<any>;
-    options: any;
+    options: Options;
     eventDrop: EventEmitter<any>;
     eventResize: EventEmitter<any>;
     eventResizeStart: EventEmitter<any>;
