@@ -1,5 +1,5 @@
-export class UpdateEventModel {
+export interface UpdateEventModel {
     event: any;
     duration: any;
-    revertFunc: void;
+    revertFunc: Function;
 }

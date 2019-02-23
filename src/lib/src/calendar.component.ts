@@ -1,4 +1,4 @@
-import { Component, Input, Output, OnInit, NgZone, AfterViewInit, HostListener, AfterContentChecked, AfterViewChecked, ElementRef, EventEmitter } from '@angular/core';
+import { Component, Input, Output, OnInit, NgZone, AfterViewInit, AfterContentChecked, AfterViewChecked, ElementRef, EventEmitter } from '@angular/core';
 import $ from 'jquery';
 import 'fullcalendar';
 import { Options } from 'fullcalendar';
@@ -11,7 +11,7 @@ import { RenderEventModel } from './models/renderEventModel';
     template: '',
 })
 export class CalendarComponent implements OnInit, AfterViewInit, AfterContentChecked, AfterViewChecked {
-    private _eventsModel: any[];
+    private _eventsModel: any[] = [];
     private _reRender = true;
     get eventsModel(): any[] {
         return this._eventsModel;
@@ -32,7 +32,7 @@ export class CalendarComponent implements OnInit, AfterViewInit, AfterContentChe
     @Output() eventsModelChange = new EventEmitter<any>();
 
     // Options object, see fullcalendar docs
-    @Input() options: any;
+    @Input() options: Options = {};
 
     // Various events
     @Output() eventDrop = new EventEmitter<any>();
@@ -75,14 +75,14 @@ export class CalendarComponent implements OnInit, AfterViewInit, AfterContentChe
             this.updaterOptions();
             this.zone.runOutsideAngular(() => {
 
-                $(this.element.nativeElement).fullCalendar(this.options);
+                const $elem = $(this.element.nativeElement);
+                $elem.fullCalendar(this.options);
                 this._eventsModel = this.options.events;
                 this.eventsModelChange.next(this.options.events);
                 this.initialized.emit(true);
-                // Click listeners
-                let elem = document.getElementsByTagName('ng-fullcalendar');
+                let elem = [this.element.nativeElement];
 
-                $('[class ^="fc"][class *="button"]').click(el => {
+                $elem.find('[class ^="fc"][class *="button"]').click(el => {
                     let classnames = el.currentTarget.className.split(' ');
                     classnames.forEach(name => {
                         if (name.indexOf('button') == name.length - 6) {
@@ -95,7 +95,7 @@ export class CalendarComponent implements OnInit, AfterViewInit, AfterContentChe
                     });
                 });
                 function eventDispatch(buttonType: string) {
-                    let data = $('ng-fullcalendar').fullCalendar('getDate');
+                    let data = $elem.fullCalendar('getDate');
                     let currentDetail: ButtonClickModel = {
                         buttonType: buttonType,
                         data: data
@@ -123,8 +123,8 @@ export class CalendarComponent implements OnInit, AfterViewInit, AfterContentChe
         this.eventsModelChange.next(events);
     }
     updaterOptions() {
-        let elem = document.getElementsByTagName('ng-fullcalendar');
-        this.options.eventDrop = (event: any, duration: any, revertFunc: void) => {
+        let elem = [this.element.nativeElement];
+        this.options.eventDrop = (event: any, duration: any, revertFunc: Function) => {
             let detail: any = { event: event, duration: duration, revertFunc: revertFunc };
             let widgetEvent = new CustomEvent('eventDrop', {
                 bubbles: true,
@@ -135,7 +135,7 @@ export class CalendarComponent implements OnInit, AfterViewInit, AfterContentChe
                 elem[i].dispatchEvent(widgetEvent);
             }
         };
-        this.options.eventResize = (event: any, duration: any, revertFunc: void) => {
+        this.options.eventResize = (event: any, duration: any, revertFunc: Function) => {
             let detail: UpdateEventModel = { event: event, duration: duration, revertFunc: revertFunc };
             let widgetEvent = new CustomEvent('eventResize', {
                 bubbles: true,
@@ -342,7 +342,7 @@ export class CalendarComponent implements OnInit, AfterViewInit, AfterContentChe
             });
             elem[0].dispatchEvent(widgetEvent);
         };
-        this.options.resourceRender = (resourceObj: any, labelTds: any, bodyTds: any) => {
+        (<any> this.options).resourceRender = (resourceObj: any, labelTds: any, bodyTds: any) => {
             let detail = { resourceObj: resourceObj, labelTds: labelTds, bodyTds: bodyTds };
             const widgetEvent = new CustomEvent('resourceRender', {
                 bubbles: true,
